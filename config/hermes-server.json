@@ -1,0 +1,6 @@
+{
+  "provider": "custom",
+  "base_url": "http://127.0.0.1:8081/v1",
+  "api_key": "local",
+  "model": "Qwen3.8-27B-Q4_K_M"
+}

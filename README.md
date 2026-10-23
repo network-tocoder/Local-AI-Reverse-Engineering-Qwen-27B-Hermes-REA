@@ -38,6 +38,14 @@ Four pieces, bottom to top:
 
 ## Setup
 
+**Before you start**
+
+| Need | Why |
+|---|---|
+| llama.cpp built with CUDA | provides `llama-server` |
+| `Qwen3.8-27B-Q4_K_M.gguf` | the weights, ~17.4 GB |
+| Node + Ghidra + Java | for the REA toolkit |
+
 **1. Start the model server** ([`config/llama-server.sh`](config/llama-server.sh))
 ```bash
 ./llama-server \
@@ -55,9 +63,15 @@ Four pieces, bottom to top:
 | `-np 1` | single slot — one agent gets all 128K |
 | `-ngl 99` | offload all layers to the GPU |
 
-**2. Point Hermes at the local server** ([`config/hermes-server.json`](config/hermes-server.json))
+**2. Install Hermes and point it at the server** ([`config/hermes-setup.md`](config/hermes-setup.md))
+```bash
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash   # Linux / macOS / WSL2
+hermes model        # → Custom endpoint → http://127.0.0.1:8081/v1
+```
+The endpoint block on its own is [`config/hermes-server.json`](config/hermes-server.json):
 ```json
 {
+  "provider": "custom",
   "base_url": "http://127.0.0.1:8081/v1",
   "api_key": "local",
   "model": "Qwen3.8-27B-Q4_K_M"
@@ -70,7 +84,11 @@ npx rea-agents setup     # installs the toolkit + Ghidra bridge (needs Ghidra, J
 npx rea-agents doctor    # should report all green
 ```
 
-**4. Run the agent** in your working folder and paste one of the prompts below.
+**4. Run the agent** in your working folder and paste one of the prompts below — or feed a prompt
+file straight in:
+```bash
+hermes chat --query-file prompts/01-save-hack.txt
+```
 
 ## The prompts
 
@@ -114,3 +132,14 @@ NVIDIA RTX 30-series or newer. **24 GB is the sweet spot** for the 27B model at 
 | 1 | [Run a 125B model on one GPU (Strata + Qwen 3.8 Flash-Next)](https://github.com/network-tocoder/Run-a-125B-AI-Model-on-One-GPU-Strata-Qwen3.8-Flash-Next) |
 | 2 | [Free local AI coding agent — 125B on 16GB (Strata + opencode)](https://github.com/network-tocoder/free-local-ai-coding-agent-125b-on-16gb-gpu-strata-opencode) |
 | 3 | [125B local AI on a 12GB GPU (Strata + Pi 1.0)](https://github.com/network-tocoder/125B-Local-AI-on-a-12GB-GPU-Strata-Pi-1.0-Coding-Agent) |
+
+## Files
+
+| File | What's in it |
+|---|---|
+| [`config/llama-server.sh`](config/llama-server.sh) | The exact llama.cpp flags used in the video |
+| [`config/hermes-setup.md`](config/hermes-setup.md) | Installing Hermes and pointing it at your local endpoint |
+| [`config/hermes-server.json`](config/hermes-server.json) | The endpoint block on its own, ready to copy |
+| [`config/rea-setup.md`](config/rea-setup.md) | REA + Ghidra, and how the tool list stays small |
+| [`prompts/01-save-hack.txt`](prompts/01-save-hack.txt) | Challenge 1 — recover a save-file format, write the editor |
+| [`prompts/02-keygen.txt`](prompts/02-keygen.txt) | Challenge 2 — find how license keys are validated, write the keygen |
